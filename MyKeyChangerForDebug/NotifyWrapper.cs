@@ -9,6 +9,20 @@ using System.Windows.Forms;
 
 namespace MyKeyChangerForDebug {
     public partial class NotifyWrapper : Component {
+        #region Declaration
+
+
+        public class ObserveStateChangedEventArgs : EventArgs {
+            public bool Observerd { set;  get; }
+            public ObserveStateChangedEventArgs(bool observed) {
+                this.Observerd = observed;
+            }
+        }
+        public delegate void ObserveStateChangedHandler(object sender, ObserveStateChangedEventArgs e);
+        public event ObserveStateChangedHandler OnObserveStateChanged;
+
+
+        #endregion
 
         #region Constructor
         public NotifyWrapper() {
@@ -35,6 +49,7 @@ namespace MyKeyChangerForDebug {
             ToolStripMenuItem itemObserve = new ToolStripMenuItem();
             itemObserve.Text = "observe";
             itemObserve.ToolTipText = "observe to input ten key";
+            itemObserve.CheckedChanged += OnObserveCheckedChanged;
             this.cMenu.Items.Add(itemObserve);
 
             ToolStripMenuItem itemMode = new ToolStripMenuItem();
@@ -59,6 +74,16 @@ namespace MyKeyChangerForDebug {
             itemExit.ToolTipText = "Exit Application";
             this.cMenu.Items.Add(itemExit);
             this.cMenu.ResumeLayout();
+        }
+        #endregion
+
+        #region Event
+        private void OnObserveCheckedChanged(object sender, EventArgs e) {
+            if (null != this.OnObserveStateChanged) {
+                ToolStripMenuItem item = (ToolStripMenuItem)sender;
+                this.OnObserveStateChanged(this, new ObserveStateChangedEventArgs(item.Checked));
+            }
+
         }
         #endregion
 
