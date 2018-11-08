@@ -74,20 +74,20 @@ namespace MyKeyChanger {
         public const short Z = 0x5A;
 
         // Tenkey
-        public const short Num0 = 0x60;
-        public const short Num1 = 0x61;
-        public const short Num2 = 0x62;
-        public const short Num3 = 0x63;
-        public const short Num4 = 0x64;
-        public const short Num5 = 0x65;
-        public const short Num6 = 0x66;
-        public const short Num7 = 0x67;
-        public const short Num8 = 0x68;
-        public const short Num9 = 0x69;
-        public const short Mulply = 0x6A;       // 
-        public const short Add = 0x6B;          // +
-        public const short Subtract = 0x6D;     // -
-        public const short Separator = 0x6C;    // /
+        public const short TenKeyNum0 = 0x60;
+        public const short TenKeyNum1 = 0x61;
+        public const short TenKeyNum2 = 0x62;
+        public const short TenKeyNum3 = 0x63;
+        public const short TenKeyNum4 = 0x64;
+        public const short TenKeyNum5 = 0x65;
+        public const short TenKeyNum6 = 0x66;
+        public const short TenKeyNum7 = 0x67;
+        public const short TenKeyNum8 = 0x68;
+        public const short TenKeyNum9 = 0x69;
+        public const short TenKeyMulply = 0x6A;       // *
+        public const short TenKeyAdd = 0x6B;          // +
+        public const short TenKeySubtract = 0x6D;     // -
+        public const short TenKeySeparator = 0x6C;    // /
 
 
         // Others
