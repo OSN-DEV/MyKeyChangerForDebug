@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>MyKeyChangerForDebug</RootNamespace>
     <AssemblyName>MyKeyChangerForDebug</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -65,17 +65,19 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AppSettingData.cs" />
+    <Compile Include="KeymappingHandler.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NotifyWrapper.cs">
+    <Compile Include="TaskTrayMenu.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="NotifyWrapper.Designer.cs">
-      <DependentUpon>NotifyWrapper.cs</DependentUpon>
+    <Compile Include="TaskTrayMenu.Designer.cs">
+      <DependentUpon>TaskTrayMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -90,8 +92,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="NotifyWrapper.resx">
-      <DependentUpon>NotifyWrapper.cs</DependentUpon>
+    <EmbeddedResource Include="TaskTrayMenu.resx">
+      <DependentUpon>TaskTrayMenu.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
