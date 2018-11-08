@@ -11,7 +11,11 @@ namespace MyKeyChangerForDebug {
     /// App.xaml の相互作用ロジック
     /// </summary>
     public partial class App : Application {
-        private TaskTrayMenu _notify;
+
+        #region Declaration
+        private TaskTrayMenu _taskTrayMenu;
+        private KeymappingHandler _keymappingHandler;
+        #endregion
 
         #region Application
         /// <summary>
@@ -20,8 +24,19 @@ namespace MyKeyChangerForDebug {
         /// <param name="e"></param>
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
-            this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            this._notify = new TaskTrayMenu();
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            _taskTrayMenu = new TaskTrayMenu();
+            _taskTrayMenu.SetMode(AppSettingData.GetInstance().Mode);
+            _taskTrayMenu.SetObserveChecked(AppSettingData.GetInstance().Observered);
+            _taskTrayMenu.OnObserveStateChanged += _taskTrayMenu_OnObserveStateChanged;
+            _taskTrayMenu.OnMappingModeChanged += _taskTrayMenu_OnMappingModeChanged;
+            _taskTrayMenu.OnExitClicked += _taskTrayMenu_OnExitClicked;
+
+            _keymappingHandler = new KeymappingHandler();
+            if (AppSettingData.GetInstance().Observered) {
+
+            }
+
         }
 
         /// <summary>
@@ -30,7 +45,21 @@ namespace MyKeyChangerForDebug {
         /// <param name="e"></param>
         protected override void OnExit(ExitEventArgs e) {
             base.OnExit(e);
-            this._notify.Dispose();
+            _taskTrayMenu.Dispose();
+        }
+        #endregion
+
+        #region TaskTrayMenuEvent
+        private void _taskTrayMenu_OnMappingModeChanged(object sender, TaskTrayMenu.MappingModeChangedEventArgs e) {
+            throw new NotImplementedException();
+        }
+
+        private void _taskTrayMenu_OnObserveStateChanged(object sender, TaskTrayMenu.ObserveStateChangedEventArgs e) {
+            throw new NotImplementedException();
+        }
+
+        private void _taskTrayMenu_OnExitClicked(object sender, EventArgs e) {
+            throw new NotImplementedException();
         }
         #endregion
 
