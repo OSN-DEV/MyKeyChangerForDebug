@@ -27,15 +27,15 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TaskTrayMenu));
             this.cNotify = new System.Windows.Forms.NotifyIcon(this.components);
             this.cMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.cWatch = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.cWatch = new System.Windows.Forms.ToolStripMenuItem();
             this.cMenu.SuspendLayout();
             // 
             // cNotify
             // 
             this.cNotify.ContextMenuStrip = this.cMenu;
             this.cNotify.Icon = ((System.Drawing.Icon)(resources.GetObject("cNotify.Icon")));
-            this.cNotify.Text = "notifyIcon1";
+            this.cNotify.Text = "KeyChangeForDebug";
             this.cNotify.Visible = true;
             // 
             // cMenu
@@ -45,14 +45,6 @@
             this.cMenu.Name = "cMenu";
             this.cMenu.Size = new System.Drawing.Size(61, 4);
             // 
-            // cWatch
-            // 
-            this.cWatch.Checked = true;
-            this.cWatch.CheckState = System.Windows.Forms.CheckState.Indeterminate;
-            this.cWatch.Name = "cWatch";
-            this.cWatch.Size = new System.Drawing.Size(108, 22);
-            this.cWatch.Text = "Watch";
-            // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Checked = true;
@@ -60,6 +52,14 @@
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(32, 19);
             this.toolStripMenuItem1.Text = "toolStripMenuItem1";
+            // 
+            // cWatch
+            // 
+            this.cWatch.Checked = true;
+            this.cWatch.CheckState = System.Windows.Forms.CheckState.Indeterminate;
+            this.cWatch.Name = "cWatch";
+            this.cWatch.Size = new System.Drawing.Size(108, 22);
+            this.cWatch.Text = "Watch";
             this.cMenu.ResumeLayout(false);
 
         }

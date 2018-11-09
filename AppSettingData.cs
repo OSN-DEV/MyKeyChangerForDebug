@@ -42,7 +42,7 @@ namespace MyKeyChangerForDebug {
         public static AppSettingData GetInstance() {
             if (null == _settingData) {
                 _settingData = (AppSettingData)LoadFromXml(_settingFile, typeof(AppSettingData));
-                if (null != _settingData) {
+                if (null == _settingData) {
                     _settingData = new AppSettingData();
                     _settingData.Observered = false;
                     _settingData.Mode = MappingMode.Android;

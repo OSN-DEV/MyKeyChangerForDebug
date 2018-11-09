@@ -14,7 +14,6 @@ namespace MyKeyChangerForDebug {
 
         #region Declaration
         private TaskTrayMenu _taskTrayMenu;
-        private KeymappingHandler _keymappingHandler;
         #endregion
 
         #region Application
@@ -32,11 +31,9 @@ namespace MyKeyChangerForDebug {
             _taskTrayMenu.OnMappingModeChanged += _taskTrayMenu_OnMappingModeChanged;
             _taskTrayMenu.OnExitClicked += _taskTrayMenu_OnExitClicked;
 
-            _keymappingHandler = new KeymappingHandler();
             if (AppSettingData.GetInstance().Observered) {
-
+                KeymappingHandler.Start(AppSettingData.GetInstance().Mode);
             }
-
         }
 
         /// <summary>
@@ -46,20 +43,32 @@ namespace MyKeyChangerForDebug {
         protected override void OnExit(ExitEventArgs e) {
             base.OnExit(e);
             _taskTrayMenu.Dispose();
+            KeymappingHandler.Stop();
         }
         #endregion
 
         #region TaskTrayMenuEvent
-        private void _taskTrayMenu_OnMappingModeChanged(object sender, TaskTrayMenu.MappingModeChangedEventArgs e) {
-            throw new NotImplementedException();
+        private void _taskTrayMenu_OnObserveStateChanged(object sender, TaskTrayMenu.ObserveStateChangedEventArgs e) {
+            AppSettingData.GetInstance().Observered = e.Observerd;
+            AppSettingData.GetInstance().Save();
+
+            if (e.Observerd) {
+                KeymappingHandler.Start(AppSettingData.GetInstance().Mode);
+            } else {
+                KeymappingHandler.Stop();
+            }
         }
 
-        private void _taskTrayMenu_OnObserveStateChanged(object sender, TaskTrayMenu.ObserveStateChangedEventArgs e) {
-            throw new NotImplementedException();
+        private void _taskTrayMenu_OnMappingModeChanged(object sender, TaskTrayMenu.MappingModeChangedEventArgs e) {
+            AppSettingData.GetInstance().Mode = e.Mode;
+            AppSettingData.GetInstance().Save();
+
+            KeymappingHandler.ChangeMapping(e.Mode);
         }
 
         private void _taskTrayMenu_OnExitClicked(object sender, EventArgs e) {
-            throw new NotImplementedException();
+            KeymappingHandler.Stop();
+            base.Shutdown();
         }
         #endregion
 

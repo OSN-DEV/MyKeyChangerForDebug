@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MyKeyChangerForDebug.AppSettingData;
 
 namespace MyKeyChangerForDebug {
     class KeymappingHandler {
@@ -25,20 +26,9 @@ namespace MyKeyChangerForDebug {
             [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
             public static extern bool UnhookWindowsHookEx(IntPtr hhk);
 
-            [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "MapVirtualKeyA")]
-            public extern static int MapVirtualKey(int wCode, int wMapType);
-
-            // https://msdn.microsoft.com/ja-jp/library/cc411004.aspx
-            [System.Runtime.InteropServices.DllImport("user32.dll")]
-            public extern static void SendInput(int nInputs, Input[] pInputs, int cbsize);
-
             // https://msdn.microsoft.com/ja-jp/library/cc364822.aspx
             [System.Runtime.InteropServices.DllImport("user32.dll")]
             public static extern uint keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
-
-            // https://msdn.microsoft.com/ja-jp/library/cc364746.aspx
-            [System.Runtime.InteropServices.DllImport("user32.dll")]
-            public static extern IntPtr GetMessageExtraInfo();
         }
 
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -51,47 +41,6 @@ namespace MyKeyChangerForDebug {
         }
         private static IntPtr _keyEventHandle;
         private static event NativeMethods.KeyboardGlobalHookCallback _hookCallback;
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
-        public struct Input {
-            [System.Runtime.InteropServices.FieldOffset(0)]
-            public int Type;
-
-            [System.Runtime.InteropServices.FieldOffset(4)]
-            public MouseInput Mouse;
-
-            [System.Runtime.InteropServices.FieldOffset(4)]
-            public KeyboardInput Keyboard;
-
-            [System.Runtime.InteropServices.FieldOffset(4)]
-            public HardwareInput Hardware;
-        }
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        public struct MouseInput {
-            public int X;
-            public int Y;
-            public int Data;
-            public int Flags;
-            public int Time;
-            public int ExtraInfo;
-        }
-
-        // https://msdn.microsoft.com/ja-jp/library/windows/desktop/ms646271(v=vs.85).aspx
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        public struct KeyboardInput {
-            public short VirtualKey;    // 1 to 254. if thd Flags menmber specifes KEYEVENTF_UNICODE, VirtualKey must be 0.
-            public ushort ScanCode;      // A hardware scan code for the key. If Flags specifies KEYEVENTF_UNICODE, wScan specifies a Unicode character which is to be sent to the foreground application.
-            public int Flags;           // 
-            public int Time;            // timestamp
-            public int ExtraInfo;
-        }
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        public struct HardwareInput {
-            public int uMsg;
-            public short wParamL;
-            public short wParamH;
-        }
         #endregion
 
         #region Declaration
@@ -99,11 +48,7 @@ namespace MyKeyChangerForDebug {
             public const int Action = 0;            // 0のみフックするのがお約束らしい
             public const int HookTypeLL = 13;       // WH_KEYBOARD_LL
         }
-        private static class InputType {
-            public const int Mouse = 0;
-            public const int Keyboard = 1;
-            public const int Hardware = 2;
-        }
+
         private static class KeyStroke {
             public const int KeyDown = 0x100;
             public const int KeyUp = 0x101;
@@ -111,246 +56,133 @@ namespace MyKeyChangerForDebug {
             public const int SysKeyup = 0x105;
         }
         private static class Flags {
-            public const int None = 0x00;
-            public const int KeyDown = 0x00;
-            public const int KeyUp = 0x02;
-            public const int ExtendeKey = 0x01;     //  拡張コード(これを設定することで修飾キーも有効になる)
-            public const int Unicode = 0x04;
-            public const int ScanCode = 0x08;
+            public const uint None = 0x16;
+            public const uint KeyDown = 0x00;
+            public const uint KeyUp = 0x02;
+            public const uint ExtendeKey = 0x01;     //  拡張コード(これを設定することで修飾キーも有効になる)
+            public const uint Unicode = 0x04;
+            public const uint ScanCode = 0x08;
         }
         private static class ExtraInfo {
             public const int SendKey = 1;
         }
 
-        private class KeySet {
-            public short VirtualKey;
-            public ushort ScanCode;
-            public int Flag;
-            public KeySet(short virtualKey, ushort scanCode, int flag) {
-                this.VirtualKey = virtualKey;
-                this.ScanCode = scanCode;
+        private class KeyData {
+            public byte[] KeySet;
+            public uint Flag;
+            public KeyData(byte[] keySet, uint flag) {
+                this.KeySet = keySet;
                 this.Flag = flag;
             }
         }
-        private class KeySetInt {
-            public short VirtualKey;
-            public int ScanCode;
-            public int Flag;
-            public KeySetInt(short virtualKey, int scanCode, int flag) {
-                this.VirtualKey = virtualKey;
-                this.ScanCode = scanCode;
-                this.Flag = flag;
-            }
+        
+        /// <summary>
+        ///  key set of index
+        /// </summary>
+        private static class KeySetIndex {
+            public const int VirtualKey = 0;
+            public const int ScanCode = 1;
         }
 
-
-
-
-
-
-
-        // User1(F14)
-        private static Dictionary<ushort, KeySet> _convertMapping1 = new Dictionary<ushort, KeySet> {
-            // line 4
-            { ScanCode.I, new KeySet( VirtualKey.Num7, ScanCode.Num7,Flags.None)},                          // 7
-            { ScanCode.O, new KeySet( VirtualKey.Num8, ScanCode.Num8,Flags.None)},                          // 8
-            { ScanCode.P, new KeySet( VirtualKey.Num9, ScanCode.Num9,Flags.None)},                          // 9
-
-            // line 3
-            { ScanCode.H, new KeySet( VirtualKey.Up, ScanCode.Up,Flags.ExtendeKey)},                        // ↑
-            { ScanCode.K, new KeySet( VirtualKey.Num4, ScanCode.Num4,Flags.None)},                          // 4
-            { ScanCode.L, new KeySet( VirtualKey.Num5, ScanCode.Num5,Flags.None)},                          // 5
-            { ScanCode.SemiColon, new KeySet( VirtualKey.Num6, ScanCode.Num6,Flags.None)},                  // 6
-
-            { ScanCode.S, new KeySet( VirtualKey.BackSlash, ScanCode.BackSlash,Flags.None)},                // ろ
-            { ScanCode.D, new KeySet( VirtualKey.BracketsR, ScanCode.BracketsR,Flags.None)},                // む
-            { ScanCode.F, new KeySet( VirtualKey.Yen, ScanCode.Yen,Flags.None)},                            // ー
-
-            // line 2
-            { ScanCode.B, new KeySet( VirtualKey.Left, ScanCode.Left,Flags.ExtendeKey)},                    // ←
-            { ScanCode.N, new KeySet( VirtualKey.Down, ScanCode.Down,Flags.ExtendeKey)},                    // ↓
-            { ScanCode.M, new KeySet( VirtualKey.Right, ScanCode.Right,Flags.ExtendeKey)},                  // →
-            { ScanCode.LessThan, new KeySet( VirtualKey.Num1, ScanCode.Num1,Flags.None)},                   // 1
-            { ScanCode.GreaterThan, new KeySet( VirtualKey.Num2, ScanCode.Num2,Flags.None)},                // 2
-            { ScanCode.Slash, new KeySet( VirtualKey.Num3, ScanCode.Num3,Flags.None)},                      // 3
-
-            { ScanCode.Z, new KeySet( 0, 0x3092, Flags.Unicode)},                                           // を
-            { ScanCode.X,  new KeySet( VirtualKey.Minus, ScanCode.Minus,Flags.None)},                       // ほ
-            { ScanCode.C, new KeySet( VirtualKey.Astarsk, ScanCode.Astarsk,Flags.None)},                    // け
-
-
-            // line 1
-            { ScanCode.Kana, new KeySet( VirtualKey.Num0, ScanCode.Num0,Flags.None)},                       // 0
+        // Android Studio
+        private static Dictionary<ushort, List<KeyData>> _mappingForAndroidStudioTemplate = new Dictionary<ushort, List<KeyData>> {
+            { KeySet.TenKeyNum7[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Into(F7)
+                { new KeyData(KeySet.F7, Flags.None)},
+            }},
+            { KeySet.TenKeyNum8[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Over(F8)
+                { new KeyData(KeySet.F8, Flags.None)},
+            }},
+            { KeySet.TenKeyNum9[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Out(Shift F8)
+                { new KeyData(KeySet.ShiftL, Flags.None)},
+                { new KeyData(KeySet.F8, Flags.None)},
+            }},
+            { KeySet.TenKeySubtract[KeySetIndex.VirtualKey], new List<KeyData>() {         // Resume Program(F9)
+                { new KeyData(KeySet.F9, Flags.None)},
+            }},
+            { KeySet.TenKeyNum4[KeySetIndex.VirtualKey], new List<KeyData>() {             // Go to Declaration(Ctonrol B)
+                { new KeyData(KeySet.ControlL, Flags.None)},
+                { new KeyData(KeySet.B, Flags.None)},
+            }},
+            { KeySet.TenKeyNum5[KeySetIndex.VirtualKey], new List<KeyData>() {             // Find Usages(Alt F7)
+                { new KeyData(KeySet.AltL, Flags.None)},
+                { new KeyData(KeySet.F7, Flags.None)},
+            }},
+            { KeySet.TenKeyNum6[KeySetIndex.VirtualKey], new List<KeyData>() {             // Back(Control Alt ←)
+                { new KeyData(KeySet.ControlL, Flags.None)},
+                { new KeyData(KeySet.AltL, Flags.None)},
+                { new KeyData(KeySet.Left, Flags.None)},
+            }},
+            { KeySet.TenKeyAdd[KeySetIndex.VirtualKey], new List<KeyData>() {             // BreakPoint(Control F8)
+                { new KeyData(KeySet.ControlL, Flags.None)},
+                { new KeyData(KeySet.F8, Flags.None)},
+            }},
+            { KeySet.TenKeyNum1[KeySetIndex.VirtualKey], new List<KeyData>() {             // Run app(Shift F10)
+                { new KeyData(KeySet.ShiftL, Flags.None)},
+                { new KeyData(KeySet.F10, Flags.None)},
+            }},
+            { KeySet.TenKeyNum2[KeySetIndex.VirtualKey], new List<KeyData>() {             // Stop(Control F2)
+                { new KeyData(KeySet.ControlL, Flags.None)},
+                { new KeyData(KeySet.F2, Flags.None)},
+            }},
+            { KeySet.TenKeyNum3[KeySetIndex.VirtualKey], new List<KeyData>() {             // Make Project(Control F9)
+                { new KeyData(KeySet.ControlL, Flags.None)},
+                { new KeyData(KeySet.F9, Flags.None)},
+            }},
         };
 
-
-        // User2(F13)
-        private static Dictionary<ushort, KeySet> _convertMapping2 = new Dictionary<ushort, KeySet> {
-            // line 4
-            { ScanCode.Q, new KeySet( VirtualKey.F1, ScanCode.F1,Flags.None)},                              // F1
-            { ScanCode.W, new KeySet( VirtualKey.F2, ScanCode.F2,Flags.None)},                              // F2
-            { ScanCode.E, new KeySet( VirtualKey.F3, ScanCode.F3,Flags.None)},                              // F3
-            { ScanCode.R, new KeySet( VirtualKey.F4, ScanCode.F4,Flags.None)},                              // F4
-            { ScanCode.T, new KeySet( VirtualKey.F5, ScanCode.F5,Flags.None)},                              // F5
-            { ScanCode.Y, new KeySet( VirtualKey.F6, ScanCode.F6,Flags.None)},                              // F6
-            { ScanCode.U, new KeySet( VirtualKey.F7, ScanCode.F7,Flags.None)},                              // F7
-            { ScanCode.I, new KeySet( VirtualKey.F8, ScanCode.F8,Flags.None)},                              // F8
-            { ScanCode.O, new KeySet( VirtualKey.F9, ScanCode.F9,Flags.None)},                              // F9
-            { ScanCode.P, new KeySet( VirtualKey.F10, ScanCode.F10,Flags.None)},                            // F10
-
-            // line 3
-            { ScanCode.A, new KeySet( VirtualKey.F11, ScanCode.F11,Flags.None)},                            // F11
-            { ScanCode.S, new KeySet( VirtualKey.F12, ScanCode.F12,Flags.None)},                            // F12
-            { ScanCode.F, new KeySet( VirtualKey.Kanji, ScanCode.Kanji,Flags.None)},                        // 半角/英数
-            { ScanCode.J, new KeySet( VirtualKey.Home, ScanCode.Home,Flags.ExtendeKey)},                    // Home
-            { ScanCode.K, new KeySet( VirtualKey.End, ScanCode.End,Flags.ExtendeKey)},                      // End
-            { ScanCode.L, new KeySet( VirtualKey.Enter, ScanCode.Enter,Flags.None)},                        // Enter
-            { ScanCode.SemiColon, new KeySet( VirtualKey.Tab, ScanCode.Tab,Flags.ExtendeKey)},              // Tab
-            
-            // line 2
-            { ScanCode.Z, new KeySet( VirtualKey.PrintScreen, ScanCode.PrintScreen,Flags.None)},            // Print Screen
-            { ScanCode.X, new KeySet( VirtualKey.ScrollLock, ScanCode.ScrollLock,Flags.None)},              // Scroll Lock
-            { ScanCode.C, new KeySet( VirtualKey.Pause, ScanCode.Pause,Flags.None)},                        // Pause
-            { ScanCode.V, new KeySet( VirtualKey.CapsLock, ScanCode.CapsLock,Flags.None)},                  // Caps
-            { ScanCode.N, new KeySet( VirtualKey.Delete, ScanCode.Delete,Flags.None)},                      // Delete
-            { ScanCode.M, new KeySet( VirtualKey.BackSpace, ScanCode.BackSpace,Flags.None)},                // BackSpace
-            { ScanCode.LessThan, new KeySet( VirtualKey.PageUp, ScanCode.PageUp,Flags.ExtendeKey)},         // BackSpace
-            { ScanCode.GreaterThan, new KeySet( VirtualKey.PageDown, ScanCode.PageDown,Flags.ExtendeKey)},  // BackSpace
-            { ScanCode.Slash, new KeySet( VirtualKey.Escape, ScanCode.Escape,Flags.None)},                  // Escape
+        // Visual Studio
+        private static Dictionary<ushort, List<KeyData>> _mappingForVisualStudioTemplate = new Dictionary<ushort, List<KeyData>> {
+            { KeySet.TenKeyNum7[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Into(F11)
+                { new KeyData(KeySet.F11, Flags.None)},
+            }},
+            { KeySet.TenKeyNum8[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Over(F10)
+                { new KeyData(KeySet.F10, Flags.None)},
+            }},
+            { KeySet.TenKeyNum9[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Out(Shift F11)
+                { new KeyData(KeySet.ShiftL, Flags.None)},
+                { new KeyData(KeySet.F11, Flags.None)},
+            }},
+            { KeySet.TenKeySubtract[KeySetIndex.VirtualKey], new List<KeyData>() {         // Resume Program(F5)
+                { new KeyData(KeySet.F5, Flags.None)},
+            }},
+            { KeySet.TenKeyNum4[KeySetIndex.VirtualKey], new List<KeyData>() {             // Go to Declaration(Control F12)
+                { new KeyData(KeySet.ControlL, Flags.None)},
+                { new KeyData(KeySet.F12, Flags.None)},
+            }},
+            { KeySet.TenKeyNum5[KeySetIndex.VirtualKey], new List<KeyData>() {             // All Preferences(Shift F12)
+                { new KeyData(KeySet.ShiftL, Flags.None)},
+                { new KeyData(KeySet.F12, Flags.None)},
+            }},
+            { KeySet.TenKeyNum6[KeySetIndex.VirtualKey], new List<KeyData>() {             // Back(Ctrl + -)
+                { new KeyData(KeySet.ControlL, Flags.KeyDown)},
+                { new KeyData(KeySet.SemiColon, Flags.KeyDown)},
+                { new KeyData(KeySet.SemiColon, Flags.KeyUp)},
+                { new KeyData(KeySet.Minus, Flags.KeyDown)},
+                { new KeyData(KeySet.Minus, Flags.KeyUp)},
+                { new KeyData(KeySet.ControlL, Flags.KeyUp)},
+            }},
+            { KeySet.TenKeyAdd[KeySetIndex.VirtualKey], new List<KeyData>() {             // BreakPoint(F9)
+                { new KeyData(KeySet.F9, Flags.None)},
+            }},
+            { KeySet.TenKeyNum1[KeySetIndex.VirtualKey], new List<KeyData>() {             // Run app(F5)
+                { new KeyData(KeySet.F5, Flags.None)},
+            }},
+            { KeySet.TenKeyNum2[KeySetIndex.VirtualKey], new List<KeyData>() {             // Stop(F5)
+                { new KeyData(KeySet.ShiftL, Flags.None)},
+                { new KeyData(KeySet.F5, Flags.None)},
+            }},
+            { KeySet.TenKeyNum3[KeySetIndex.VirtualKey], new List<KeyData>() {             // Build(Ctrl Shift F5)
+                { new KeyData(KeySet.ControlL, Flags.None)},
+                { new KeyData(KeySet.ShiftL, Flags.None)},
+                { new KeyData(KeySet.B, Flags.None)},
+            }},
         };
 
-        // User3(@)
-        private static Dictionary<ushort, KeySet> _convertMapping3 = new Dictionary<ushort, KeySet> {
-            // line 4
-            { ScanCode.Q, new KeySet( 0, 0x21, Flags.Unicode)},                                             // !
-            { ScanCode.W, new KeySet( 0, 0x22, Flags.Unicode)},                                             // "
-            { ScanCode.E, new KeySet( 0, 0x23, Flags.Unicode)},                                             // #
-            { ScanCode.R, new KeySet( 0, 0x24, Flags.Unicode)},                                             // $
-            { ScanCode.T, new KeySet( 0, 0x25, Flags.Unicode)},                                             // %
-            { ScanCode.Y, new KeySet( 0, 0x26, Flags.Unicode)},                                             // &
-            { ScanCode.U, new KeySet( 0, 0x27, Flags.Unicode)},                                             // '
-            { ScanCode.I, new KeySet( 0, 0x28, Flags.Unicode)},                                             // (
-            { ScanCode.O, new KeySet( 0, 0x29, Flags.Unicode)},                                             // )
-            { ScanCode.P, new KeySet( 0, 0x5C, Flags.Unicode)},                                             // \
+        private static Dictionary<ushort, List<KeyData>> _currentMapping;
+        #endregion
 
-            // line 3
-            { ScanCode.A, new KeySet( VirtualKey.SemiColon, ScanCode.SemiColon,Flags.None)},                // + 
-            { ScanCode.S, new KeySet( VirtualKey.Minus, ScanCode.Minus,Flags.None)},                        // -
-            { ScanCode.D, new KeySet( VirtualKey.Astarsk, ScanCode.Astarsk,Flags.None)},                    // :
-            { ScanCode.F, new KeySet( VirtualKey.Caret, ScanCode.Caret,Flags.None)},                        // ^
-            { ScanCode.G, new KeySet( VirtualKey.BackSlash, ScanCode.BackSlash,Flags.None)},                // \
-            
-            // line 2
-            { ScanCode.Z, new KeySet( VirtualKey.BracketsL, ScanCode.BracketsL,Flags.None)},                // [
-            { ScanCode.X, new KeySet( VirtualKey.BracketsR, ScanCode.BracketsR,Flags.None)},                // ]
-            { ScanCode.C, new KeySet( VirtualKey.Yen, ScanCode.Yen,Flags.None)},                            // \
-            { ScanCode.V, new KeySet( VirtualKey.AtMark, ScanCode.AtMark,Flags.None)},                      // @
-        };
+        #region Constructor
 
-        // User4(Muhenkan)
-        private static Dictionary<ushort, KeySet> _convertMapping4 = new Dictionary<ushort, KeySet> {
-            // line 5
-            { ScanCode.Num1, new KeySet( VirtualKey.F1, ScanCode.F1,Flags.None)},                           // F1
-            { ScanCode.Num2, new KeySet( VirtualKey.F2, ScanCode.F2,Flags.None)},                           // F2
-            { ScanCode.Num3, new KeySet( VirtualKey.F3, ScanCode.F3,Flags.None)},                           // F3
-            { ScanCode.Num4, new KeySet( VirtualKey.F4, ScanCode.F4,Flags.None)},                           // F4
-            { ScanCode.Num5, new KeySet( VirtualKey.F5, ScanCode.F5,Flags.None)},                           // F5
-            { ScanCode.Num6, new KeySet( VirtualKey.F6, ScanCode.F6,Flags.None)},                           // F6
-            { ScanCode.Num7, new KeySet( VirtualKey.F7, ScanCode.F7,Flags.None)},                           // F7
-            { ScanCode.Num8, new KeySet( VirtualKey.F8, ScanCode.F8,Flags.None)},                           // F8
-            { ScanCode.Num9, new KeySet( VirtualKey.F9, ScanCode.F9,Flags.None)},                           // F9
-            { ScanCode.Num0, new KeySet( VirtualKey.F10, ScanCode.F10,Flags.None)},                         // F10
-            { ScanCode.Minus, new KeySet( VirtualKey.F11, ScanCode.F11,Flags.None)},                        // F11
-            { ScanCode.Caret, new KeySet( VirtualKey.F12, ScanCode.F12,Flags.None)},                        // F12
-
-            // line 4
-            { ScanCode.Q, new KeySet( VirtualKey.Num1, ScanCode.Num1,Flags.None)},                          // 1
-            { ScanCode.W, new KeySet( VirtualKey.Num2, ScanCode.Num2,Flags.None)},                          // 2
-            { ScanCode.E, new KeySet( VirtualKey.Num3, ScanCode.Num3,Flags.None)},                          // 3
-            { ScanCode.R, new KeySet( VirtualKey.Num4, ScanCode.Num4,Flags.None)},                          // 4
-            { ScanCode.T, new KeySet( VirtualKey.Num5, ScanCode.Num5,Flags.None)},                          // 5
-            { ScanCode.Y, new KeySet( VirtualKey.Num6, ScanCode.Num6,Flags.None)},                          // 6
-            { ScanCode.U, new KeySet( VirtualKey.Num7, ScanCode.Num7,Flags.None)},                          // 7
-            { ScanCode.I, new KeySet( VirtualKey.Num8, ScanCode.Num8,Flags.None)},                          // 8
-            { ScanCode.O, new KeySet( VirtualKey.Num9, ScanCode.Num9,Flags.None)},                          // 9
-            { ScanCode.P, new KeySet( VirtualKey.Num0, ScanCode.Num0,Flags.None)},                          // 0
-
-            // line 3
-            { ScanCode.A, new KeySet( VirtualKey.Caret, ScanCode.Caret,Flags.None)},                        // へ
-            { ScanCode.S, new KeySet( VirtualKey.BackSlash, ScanCode.BackSlash,Flags.None)},                // ろ
-            { ScanCode.D, new KeySet( VirtualKey.BracketsR, ScanCode.BracketsR,Flags.None)},                // む
-            { ScanCode.F, new KeySet( VirtualKey.Yen, ScanCode.Yen,Flags.None)},                            // ー
-            { ScanCode.G, new KeySet( 0, 0x3063, Flags.Unicode)},                                           // っ
-            { ScanCode.H, new KeySet( 0, 0x3092, Flags.Unicode)},
-
-            { ScanCode.J, new KeySet( VirtualKey.Home, ScanCode.Home,Flags.ExtendeKey)},                    // Home
-            { ScanCode.K, new KeySet( VirtualKey.End, ScanCode.End,Flags.ExtendeKey)},                      // End
-            { ScanCode.L, new KeySet( VirtualKey.Enter, ScanCode.Enter,Flags.None)},                        // Enter 
-            { ScanCode.SemiColon, new KeySet( VirtualKey.BackSpace, ScanCode.BackSpace,Flags.ExtendeKey)},  // BackSpace
-
-            // line 2
-            { ScanCode.Z, new KeySet( 0, 0x3092, Flags.Unicode)},                                           // を
-            { ScanCode.X,  new KeySet( VirtualKey.Minus, ScanCode.Minus,Flags.None)},                       // ほ
-            { ScanCode.C, new KeySet( VirtualKey.Astarsk, ScanCode.Astarsk,Flags.None)},                    // け
-            { ScanCode.V, new KeySet( 0, 0x3063, Flags.Unicode)},                                           // っ
-
-            { ScanCode.N, new KeySet( VirtualKey.Delete, ScanCode.Delete,Flags.ExtendeKey)},                // Delete
-            { ScanCode.M, new KeySet( VirtualKey.PageUp, ScanCode.PageUp,Flags.ExtendeKey)},                // Page Up
-            { ScanCode.LessThan, new KeySet( VirtualKey.PageDown, ScanCode.PageDown,Flags.ExtendeKey)},     // Page Down
-
-            // line 1
-        };
-
-        // User5(Henkan)
-        private static Dictionary<ushort, KeySet> _convertMapping5 = new Dictionary<ushort, KeySet> {
-            // line 4
-            { ScanCode.Q, new KeySet( VirtualKey.Num1, ScanCode.Num1,Flags.None)},                          // 1
-            { ScanCode.W, new KeySet( VirtualKey.Num2, ScanCode.Num2,Flags.None)},                          // 2
-            { ScanCode.E, new KeySet( VirtualKey.Num3, ScanCode.Num3,Flags.None)},                          // 3
-            { ScanCode.R, new KeySet( VirtualKey.Num4, ScanCode.Num4,Flags.None)},                          // 4
-            { ScanCode.T, new KeySet( VirtualKey.Num5, ScanCode.Num5,Flags.None)},                          // 5
-            { ScanCode.Y, new KeySet( VirtualKey.Num6, ScanCode.Num6,Flags.None)},                          // 6
-            { ScanCode.U, new KeySet( VirtualKey.Num7, ScanCode.Num7,Flags.None)},                          // 7
-            { ScanCode.I, new KeySet( VirtualKey.Num8, ScanCode.Num8,Flags.None)},                          // 8
-            { ScanCode.O, new KeySet( VirtualKey.Num9, ScanCode.Num9,Flags.None)},                          // 9
-            { ScanCode.P, new KeySet( VirtualKey.Num0, ScanCode.Num0,Flags.None)},                          // 0
-
-            // line 3
-            { ScanCode.A, new KeySet( 0, 0x3063, Flags.Unicode)},                                           // っ
-            { ScanCode.S, new KeySet( VirtualKey.Minus, ScanCode.Minus,Flags.None)},                        // ほ
-            { ScanCode.D, new KeySet( VirtualKey.Astarsk, ScanCode.Astarsk,Flags.None)},                    // け
-            { ScanCode.F, new KeySet( VirtualKey.Num0, ScanCode.Num0,Flags.None)},                          // 0
-            { ScanCode.G, new KeySet( 0, 0x3092, Flags.Unicode)},                                           // を
-            { ScanCode.H, new KeySet( 0, 0x3083, Flags.Unicode)},                                           // ゃ
-            { ScanCode.J, new KeySet( 0, 0x3085, Flags.Unicode)},                                           // ゅ
-            { ScanCode.K, new KeySet( 0, 0x3087, Flags.Unicode)},                                           // ょ
-
-            { ScanCode.L, new KeySet( VirtualKey.Enter, ScanCode.Enter,Flags.None)},                        // Enter
-            { ScanCode.SemiColon, new KeySet( VirtualKey.Tab, ScanCode.Tab,Flags.ExtendeKey)},              // Tab
-
-            // line 2
-            { ScanCode.M, new KeySet( VirtualKey.Left, ScanCode.Left,Flags.ExtendeKey)},                    // Left
-            { ScanCode.LessThan, new KeySet( VirtualKey.Down, ScanCode.Down,Flags.ExtendeKey)},             // Down
-            { ScanCode.GreaterThan, new KeySet( VirtualKey.Up, ScanCode.Up,Flags.ExtendeKey)},              // Up
-            { ScanCode.Slash, new KeySet( VirtualKey.Right, ScanCode.Right,Flags.ExtendeKey)},              // Right
-        };
-
-
-        // single
-        private static Dictionary<ushort, KeySet> _normalConvert = new Dictionary<ushort, KeySet> {
-            //{ ScanCode.P, new KeySet( VirtualKey.SemiColon, ScanCode.SemiColon,Flags.None)},                // 
-            //{ ScanCode.SemiColon, new KeySet( VirtualKey.P, ScanCode.P,Flags.None)},                        // 
-            { ScanCode.Astarsk, new KeySet( VirtualKey.Minus, ScanCode.Minus,Flags.None)},                  // 
-            { ScanCode.BackSlash, new KeySet( 0, 0x3093, Flags.Unicode)},                                   // ん
-        };
-
-        private static Dictionary<int, Dictionary<ushort, KeySet>> _convertMappingList = new Dictionary<int, Dictionary<ushort, KeySet>> {
-            { ModifiedKey.User1, _convertMapping1},
-            { ModifiedKey.User2, _convertMapping2},
-            { ModifiedKey.User3, _convertMapping3},
-            { ModifiedKey.User4, _convertMapping4},
-            { ModifiedKey.User5, _convertMapping5},
-        };
         #endregion
 
         #region Public Property
@@ -364,10 +196,12 @@ namespace MyKeyChangerForDebug {
         /// <summary>
         ///  start global hook.
         /// </summary>
-        public static void Start() {
+        public static void Start(MappingMode mode) {
             if (IsHooking) {
                 return;
             }
+
+            ChangeMapping(mode);
             IsHooking = true;
 
             _hookCallback = HookProcedure;
@@ -393,7 +227,23 @@ namespace MyKeyChangerForDebug {
                 NativeMethods.UnhookWindowsHookEx(_keyEventHandle);
                 _keyEventHandle = IntPtr.Zero;
                 _hookCallback -= HookProcedure;
-                _modified = ModifiedKey.None;
+            }
+        }
+
+        /// <summary>
+        /// change mapping mode
+        /// </summary>
+        /// <param name="mode"></param>
+        public static void ChangeMapping(MappingMode mode) {
+            switch (mode) {
+                case MappingMode.Android:
+                    SetupCurrentMapping(_mappingForAndroidStudioTemplate);
+                    break;
+                case MappingMode.VisualStudio:
+                    SetupCurrentMapping(_mappingForVisualStudioTemplate);
+                    break;
+                default:
+                    return;
             }
         }
         #endregion
@@ -412,79 +262,54 @@ namespace MyKeyChangerForDebug {
                 goto ExitProc;
             }
 
-            if (hookData.vkCode == VirtualKey.ControlL) {
-                goto ExitProc;
-            }
-
-            var keyStroke = (KeyStroke.KeyDown == msg) ? Flags.KeyDown : Flags.KeyUp;
-            if (_modifiedKeys.ContainsKey(scanCode)) {
+            if (_currentMapping.ContainsKey(scanCode)) {
                 if (KeyStroke.KeyDown == msg) {
-                    _modified = _modifiedKeys[scanCode];
-                } else {
-                    _modified = ModifiedKey.None;
+                    SendKey(_currentMapping[scanCode]);
                 }
-                if (_modifiedKeys.ContainsKey(scanCode)) {
-                    return (IntPtr)1;
+                return (IntPtr)1;
+            } else if (scanCode == KeySet.TenKeyNum0[KeySetIndex.ScanCode]) {
+                if (KeyStroke.KeyUp == msg) {
+                    var refrence = new KeyMappingReference();
+                    refrence.ShowDialog();
                 }
-                goto ExitProc;
-            }
-            if (ModifiedKey.None == _modified) {
-                if (_normalConvert.ContainsKey(scanCode)) {
-                    SendKey(keyStroke, _normalConvert[scanCode]);
-                    return (IntPtr)1;
-                }
-                goto ExitProc;
-            }
-
-
-            var mappingData = _convertMappingList[_modified];
-            if (mappingData.ContainsKey(scanCode)) {
-                SendKey(keyStroke, mappingData[scanCode]);
                 return (IntPtr)1;
             }
-
             ExitProc:
             return NativeMethods.CallNextHookEx(_keyEventHandle, code, msg, ref hookData);
         }
 
-
         /// <summary>
-        /// send key
+        /// set up key mapping list
         /// </summary>
-        /// <param name="flag">flag. usually set additional flags</param>
-        /// <param name="keyset">key set</param>
-        private static void SendKey(int flag, KeySet keyset) {
-            Input input = new Input();
-            input.Type = InputType.Keyboard;
-            input.Keyboard.Flags = flag | keyset.Flag;
-            input.Keyboard.VirtualKey = keyset.VirtualKey;
-            input.Keyboard.ScanCode = keyset.ScanCode;
-            input.Keyboard.Time = 0;
-            input.Keyboard.ExtraInfo = ExtraInfo.SendKey;
-            Input[] inputs = { input };
-            NativeMethods.SendInput(inputs.Length, inputs, System.Runtime.InteropServices.Marshal.SizeOf(inputs[0]));
+        /// <param name="template"></param>
+        private static void SetupCurrentMapping(Dictionary<ushort, List<KeyData>> template) {
+            _currentMapping = new Dictionary<ushort, List<KeyData>>(template);
+
+            var keys = new List<ushort>(_currentMapping.Keys);
+            foreach (var key in keys) {
+                var keyList = _currentMapping[key];
+                if (keyList[0].Flag != Flags.None) {
+                    continue;
+                }
+                foreach (var keyset in keyList) {
+                    keyset.Flag = Flags.KeyDown;
+                }
+                for (int i = keyList.Count - 1; 0 <= i; i--) {
+                    keyList.Add(new KeyData(keyList[i].KeySet, Flags.KeyUp));
+                }
+            }
         }
 
 
         /// <summary>
-        /// send key
+        /// 
         /// </summary>
-        /// <param name="flag">flag. usually set additional flags</param>
-        /// <param name="keyset">key set</param>
-        private static void SendKey(int flag, KeySetInt keyset) {
-            var unicodeStr = char.ConvertFromUtf32(keyset.ScanCode);
-            Input[] inputs = new Input[unicodeStr.Length];
-            for (int i = 0; i < inputs.Length; i++) {
-                Input input = new Input();
-                input.Type = InputType.Keyboard;
-                input.Keyboard.Flags = flag | keyset.Flag;
-                input.Keyboard.VirtualKey = keyset.VirtualKey;
-                input.Keyboard.ScanCode = (ushort)unicodeStr[i];
-                input.Keyboard.Time = 0;
-                input.Keyboard.ExtraInfo = ExtraInfo.SendKey;
-                inputs[i] = input;
+        /// <param name="keyList"></param>
+        private static void SendKey(List<KeyData> keyList) {
+            foreach (var key in keyList) {
+                NativeMethods.keybd_event(
+                    key.KeySet[KeySetIndex.VirtualKey], key.KeySet[KeySetIndex.ScanCode], key.Flag, (UIntPtr)ExtraInfo.SendKey);
             }
-            NativeMethods.SendInput(inputs.Length, inputs, System.Runtime.InteropServices.Marshal.SizeOf(inputs[0]));
         }
         #endregion
     }
