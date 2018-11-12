@@ -86,45 +86,45 @@ namespace MyKeyChangerForDebug {
 
         // Android Studio
         private static Dictionary<ushort, List<KeyData>> _mappingForAndroidStudioTemplate = new Dictionary<ushort, List<KeyData>> {
-            { KeySet.TenKeyNum7[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Into(F7)
+            { KeySet.TenKeyNum7[KeySetIndex.ScanCode], new List<KeyData>() {             // Step Into(F7)
                 { new KeyData(KeySet.F7, Flags.None)},
             }},
-            { KeySet.TenKeyNum8[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Over(F8)
+            { KeySet.TenKeyNum8[KeySetIndex.ScanCode], new List<KeyData>() {             // Step Over(F8)
                 { new KeyData(KeySet.F8, Flags.None)},
             }},
-            { KeySet.TenKeyNum9[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Out(Shift F8)
+            { KeySet.TenKeyNum9[KeySetIndex.ScanCode], new List<KeyData>() {             // Step Out(Shift F8)
                 { new KeyData(KeySet.ShiftL, Flags.None)},
                 { new KeyData(KeySet.F8, Flags.None)},
             }},
-            { KeySet.TenKeySubtract[KeySetIndex.VirtualKey], new List<KeyData>() {         // Resume Program(F9)
+            { KeySet.TenKeySubtract[KeySetIndex.ScanCode], new List<KeyData>() {         // Resume Program(F9)
                 { new KeyData(KeySet.F9, Flags.None)},
             }},
-            { KeySet.TenKeyNum4[KeySetIndex.VirtualKey], new List<KeyData>() {             // Go to Declaration(Ctonrol B)
+            { KeySet.TenKeyNum4[KeySetIndex.ScanCode], new List<KeyData>() {             // Go to Declaration(Ctonrol B)
                 { new KeyData(KeySet.ControlL, Flags.None)},
                 { new KeyData(KeySet.B, Flags.None)},
             }},
-            { KeySet.TenKeyNum5[KeySetIndex.VirtualKey], new List<KeyData>() {             // Find Usages(Alt F7)
+            { KeySet.TenKeyNum5[KeySetIndex.ScanCode], new List<KeyData>() {             // Find Usages(Alt F7)
                 { new KeyData(KeySet.AltL, Flags.None)},
                 { new KeyData(KeySet.F7, Flags.None)},
             }},
-            { KeySet.TenKeyNum6[KeySetIndex.VirtualKey], new List<KeyData>() {             // Back(Control Alt ←)
+            { KeySet.TenKeyNum6[KeySetIndex.ScanCode], new List<KeyData>() {             // Back(Control Alt ←)
                 { new KeyData(KeySet.ControlL, Flags.None)},
                 { new KeyData(KeySet.AltL, Flags.None)},
                 { new KeyData(KeySet.Left, Flags.None)},
             }},
-            { KeySet.TenKeyAdd[KeySetIndex.VirtualKey], new List<KeyData>() {             // BreakPoint(Control F8)
+            { KeySet.TenKeyAdd[KeySetIndex.ScanCode], new List<KeyData>() {             // BreakPoint(Control F8)
                 { new KeyData(KeySet.ControlL, Flags.None)},
                 { new KeyData(KeySet.F8, Flags.None)},
             }},
-            { KeySet.TenKeyNum1[KeySetIndex.VirtualKey], new List<KeyData>() {             // Run app(Shift F10)
+            { KeySet.TenKeyNum1[KeySetIndex.ScanCode], new List<KeyData>() {             // Run app(Shift F10)
                 { new KeyData(KeySet.ShiftL, Flags.None)},
                 { new KeyData(KeySet.F10, Flags.None)},
             }},
-            { KeySet.TenKeyNum2[KeySetIndex.VirtualKey], new List<KeyData>() {             // Stop(Control F2)
+            { KeySet.TenKeyNum2[KeySetIndex.ScanCode], new List<KeyData>() {             // Stop(Control F2)
                 { new KeyData(KeySet.ControlL, Flags.None)},
                 { new KeyData(KeySet.F2, Flags.None)},
             }},
-            { KeySet.TenKeyNum3[KeySetIndex.VirtualKey], new List<KeyData>() {             // Make Project(Control F9)
+            { KeySet.TenKeyNum3[KeySetIndex.ScanCode], new List<KeyData>() {             // Make Project(Control F9)
                 { new KeyData(KeySet.ControlL, Flags.None)},
                 { new KeyData(KeySet.F9, Flags.None)},
             }},
@@ -132,28 +132,28 @@ namespace MyKeyChangerForDebug {
 
         // Visual Studio
         private static Dictionary<ushort, List<KeyData>> _mappingForVisualStudioTemplate = new Dictionary<ushort, List<KeyData>> {
-            { KeySet.TenKeyNum7[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Into(F11)
+            { KeySet.TenKeyNum7[KeySetIndex.ScanCode], new List<KeyData>() {             // Step Into(F11)
                 { new KeyData(KeySet.F11, Flags.None)},
             }},
-            { KeySet.TenKeyNum8[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Over(F10)
+            { KeySet.TenKeyNum8[KeySetIndex.ScanCode], new List<KeyData>() {             // Step Over(F10)
                 { new KeyData(KeySet.F10, Flags.None)},
             }},
-            { KeySet.TenKeyNum9[KeySetIndex.VirtualKey], new List<KeyData>() {             // Step Out(Shift F11)
+            { KeySet.TenKeyNum9[KeySetIndex.ScanCode], new List<KeyData>() {             // Step Out(Shift F11)
                 { new KeyData(KeySet.ShiftL, Flags.None)},
                 { new KeyData(KeySet.F11, Flags.None)},
             }},
-            { KeySet.TenKeySubtract[KeySetIndex.VirtualKey], new List<KeyData>() {         // Resume Program(F5)
+            { KeySet.TenKeySubtract[KeySetIndex.ScanCode], new List<KeyData>() {         // Resume Program(F5)
                 { new KeyData(KeySet.F5, Flags.None)},
             }},
-            { KeySet.TenKeyNum4[KeySetIndex.VirtualKey], new List<KeyData>() {             // Go to Declaration(Control F12)
+            { KeySet.TenKeyNum4[KeySetIndex.ScanCode], new List<KeyData>() {             // Go to Declaration(Control F12)
                 { new KeyData(KeySet.ControlL, Flags.None)},
                 { new KeyData(KeySet.F12, Flags.None)},
             }},
-            { KeySet.TenKeyNum5[KeySetIndex.VirtualKey], new List<KeyData>() {             // All Preferences(Shift F12)
+            { KeySet.TenKeyNum5[KeySetIndex.ScanCode], new List<KeyData>() {             // All Preferences(Shift F12)
                 { new KeyData(KeySet.ShiftL, Flags.None)},
                 { new KeyData(KeySet.F12, Flags.None)},
             }},
-            { KeySet.TenKeyNum6[KeySetIndex.VirtualKey], new List<KeyData>() {             // Back(Ctrl + -)
+            { KeySet.TenKeyNum6[KeySetIndex.ScanCode], new List<KeyData>() {             // Back(Ctrl + -)
                 { new KeyData(KeySet.ControlL, Flags.KeyDown)},
                 { new KeyData(KeySet.SemiColon, Flags.KeyDown)},
                 { new KeyData(KeySet.SemiColon, Flags.KeyUp)},
@@ -161,17 +161,17 @@ namespace MyKeyChangerForDebug {
                 { new KeyData(KeySet.Minus, Flags.KeyUp)},
                 { new KeyData(KeySet.ControlL, Flags.KeyUp)},
             }},
-            { KeySet.TenKeyAdd[KeySetIndex.VirtualKey], new List<KeyData>() {             // BreakPoint(F9)
+            { KeySet.TenKeyAdd[KeySetIndex.ScanCode], new List<KeyData>() {             // BreakPoint(F9)
                 { new KeyData(KeySet.F9, Flags.None)},
             }},
-            { KeySet.TenKeyNum1[KeySetIndex.VirtualKey], new List<KeyData>() {             // Run app(F5)
+            { KeySet.TenKeyNum1[KeySetIndex.ScanCode], new List<KeyData>() {             // Run app(F5)
                 { new KeyData(KeySet.F5, Flags.None)},
             }},
-            { KeySet.TenKeyNum2[KeySetIndex.VirtualKey], new List<KeyData>() {             // Stop(F5)
+            { KeySet.TenKeyNum2[KeySetIndex.ScanCode], new List<KeyData>() {             // Stop(F5)
                 { new KeyData(KeySet.ShiftL, Flags.None)},
                 { new KeyData(KeySet.F5, Flags.None)},
             }},
-            { KeySet.TenKeyNum3[KeySetIndex.VirtualKey], new List<KeyData>() {             // Build(Ctrl Shift F5)
+            { KeySet.TenKeyNum3[KeySetIndex.ScanCode], new List<KeyData>() {             // Build(Ctrl Shift F5)
                 { new KeyData(KeySet.ControlL, Flags.None)},
                 { new KeyData(KeySet.ShiftL, Flags.None)},
                 { new KeyData(KeySet.B, Flags.None)},
