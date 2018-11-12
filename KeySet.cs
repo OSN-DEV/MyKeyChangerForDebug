@@ -26,6 +26,7 @@
         public readonly static byte[] F14 = { 0x7D, 0x65 };
 
         // Number
+        public readonly static byte[] Num0 = { 0x30, 0x0B };
         public readonly static byte[] Num1 = { 0x31, 0x02 };
         public readonly static byte[] Num2 = { 0x32, 0x03 };
         public readonly static byte[] Num3 = { 0x33, 0x04 };
@@ -35,7 +36,6 @@
         public readonly static byte[] Num7 = { 0x37, 0x08 };
         public readonly static byte[] Num8 = { 0x38, 0x09 };
         public readonly static byte[] Num9 = { 0x39, 0x0A };
-        public readonly static byte[] Num0 = { 0x30, 0x0B };
 
         // Alpha
         public readonly static byte[] A = { 0x41, 0x1E };

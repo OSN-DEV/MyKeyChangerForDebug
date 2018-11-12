@@ -65,6 +65,7 @@ namespace MyKeyChangerForDebug {
         }
         private static class ExtraInfo {
             public const int SendKey = 1;
+            public const int LLKHF_EXTENDED = 0x00000001;
         }
 
         private class KeyData {
@@ -258,12 +259,23 @@ namespace MyKeyChangerForDebug {
         /// <returns></returns>
         private static IntPtr HookProcedure(int code, uint msg, ref KBDLLHOOKSTRUCT hookData) {
             ushort scanCode = (ushort)hookData.scanCode;
+
             if (Const.Action != code || (IntPtr)ExtraInfo.SendKey == hookData.dwExtraInfo) {
+                goto ExitProc;
+            }
+            // 例えば←とテンキーの4はスキャンコードが同一。テンキーは拡張フラグがオフなので、
+            // それ前提の判断とする。
+            if ((hookData.flags & ExtraInfo.LLKHF_EXTENDED) == ExtraInfo.LLKHF_EXTENDED) {
                 goto ExitProc;
             }
 
             if (_currentMapping.ContainsKey(scanCode)) {
                 if (KeyStroke.KeyDown == msg) {
+                    System.Diagnostics.Debug.Print("dwExtraInfo:" + hookData.dwExtraInfo);
+                    System.Diagnostics.Debug.Print("flags:" + hookData.flags);
+                    System.Diagnostics.Debug.Print("flags:" + hookData.vkCode);
+
+
                     SendKey(_currentMapping[scanCode]);
                 }
                 return (IntPtr)1;
