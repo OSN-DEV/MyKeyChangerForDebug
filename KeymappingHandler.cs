@@ -147,7 +147,7 @@ namespace MyKeyChangerForDebug {
                 { new KeyData(KeySet.F5, Flags.None)},
             }},
             { KeySet.TenKeyNum4[KeySetIndex.ScanCode], new List<KeyData>() {             // Go to Declaration(Control F12)
-                { new KeyData(KeySet.ControlL, Flags.None)},
+//                { new KeyData(KeySet.ControlL, Flags.None)},
                 { new KeyData(KeySet.F12, Flags.None)},
             }},
             { KeySet.TenKeyNum5[KeySetIndex.ScanCode], new List<KeyData>() {             // All Preferences(Shift F12)
